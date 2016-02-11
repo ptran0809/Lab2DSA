@@ -1,27 +1,43 @@
 package lab2_v0;
 
-public class MyLinkedList<E> implements MyList<E> {
-    private class Node<E>{
-	E e;
-	Node<E> nextE = null;
-	private Node(E e) {
-	    this.e = e;
+public class MyLinkedList<E extends copyable> implements MyList<E> {
+	private class Node<E> implements copyable{
+		E e;
+		Node<E> nextE = null;
+
+		private Node(E e) {
+			this.e = e;
+		}
+
+		private E getE() {
+			return e;
+		}
+
+		private void setE(E e) {
+			this.e = e;
+		}
+
+		private Node<E> getNextE() {
+			return nextE;
+		}
+
+		private void setNextE(Node<E> nextE) {
+			this.nextE = nextE;
+		}
+		
+		public boolean equals(Node<E> e){
+			return this.getE().equals(e.getE());
+		}
+		
+		public boolean isContain(E e){
+			return this.getE().equals(e);
+		}
+		public Node<E> copy(){
+			return new Node(((copyable) this.e).copy());
+		}
+
 	}
-	private E getE() {
-	    return e;
-	}
-	private void setE(E e) {
-	    this.e = e;
-	}
-	private Node<E> getNextE() {
-	    return nextE;
-	}
-	private void setNextE(Node<E> nextE) {
-	    this.nextE = nextE;
-	}
-	
-    }
-    
+
     Node<E> element =null;
     int size;
 
@@ -84,63 +100,165 @@ public class MyLinkedList<E> implements MyList<E> {
 	
     }
 
-    @Override
+	@Override
     public boolean contains(E e) {
-	// TODO Auto-generated method stub
+    	Node<E> curr = this.element;
+    	while(curr!= null){
+    		if(curr.isContain(e)){
+    			return true;
+    		}
+    	}
 	return false;
     }
 
     @Override
     public Object get(int index) {
-	// TODO Auto-generated method stub
-	return null;
+    	Node<E> curr = this.element;
+    	if(index>=0 && index < this.size){
+    		for(int i=0; i< index;i++){
+    			curr = curr.getNextE();
+    		}
+    		return curr.getE();
+    	}
+    	else {
+    		throw new IndexOutOfBoundsException();
+    	}   	
+	
     }
 
     @Override
     public int indexOf(E e) {
 	// TODO Auto-generated method stub
-	return 0;
+    	Node<E> curr = this.element;
+		for(int i=0; i< this.size;i++){
+			curr = curr.getNextE();
+			if(curr.isContain(e)){
+				return i;
+			}
+		}
+		return -1;
     }
 
     @Override
     public boolean isEmpty() {
-	// TODO Auto-generated method stub
-	return false;
+    	return (this.element == null);
     }
 
     @Override
     public void remove(int index) {
-	// TODO Auto-generated method stub
-	
+    	Node<E> curr = this.element;
+    	Node<E> last = null;
+    	if(index >=0 && index < this.size){
+    		for(int i=0;i< index;i++){
+    			last = curr;
+    			curr = curr.getNextE();
+    		}
+    		last.setNextE(curr.getNextE());
+    		curr.nextE = null;
+    		curr = null;
+    	}
+    	else {
+    		throw new IndexOutOfBoundsException();
+    	} 
     }
 
     @Override
     public void set(int index, E e) {
-	// TODO Auto-generated method stub
-	
+    	Node<E> curr = this.element;
+    	if(index >=0 && index < this.size){
+    		for(int i=0;i< index;i++){
+    			curr = curr.getNextE();
+    		}
+    		curr.setE(e);
+    	}
+    	else {
+    		throw new IndexOutOfBoundsException();
+    	} 
     }
 
     @Override
     public int size() {
 	// TODO Auto-generated method stub
-	return 0;
+    	return this.size;
     }
 
     @Override
     public MyList<E> subList(int fromIndex, int toIndex) {
-	// TODO Auto-generated method stub
-	return null;
+    	MyLinkedList<E> newList = new MyLinkedList<E>();
+    	Node<E> newCurr = null;
+    	Node<E> curr = this.element;
+    	Node<E> last = this.element;
+    	if(fromIndex <= this.size -1 && fromIndex >= 0 
+    			&& toIndex <= this.size -1 && toIndex >= 0
+    			&& fromIndex < toIndex){
+    		for(int i =0;i< toIndex;i++){
+    			if(i == fromIndex){
+    				newList.element = new Node<E>((E) curr.getE().copy());
+    				newCurr = newList.element;
+    			}
+    			else if(i > fromIndex){
+    				newCurr.setNextE(new Node<E>((E) curr.getE().copy()));
+    				newCurr = newCurr.getNextE();
+    			}
+    			curr = curr.nextE;
+    		}
+    	}
+    	else{
+    		throw new IndexOutOfBoundsException();
+    	}
+    	return newList;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public E[] toArray() {
-	// TODO Auto-generated method stub
-	return null;
+    	E[] array = (E[])new Object[this.size];
+    	Node<E> curr= this.element;
+    	for(int i=0;i<this.size;i++){
+    		array[i] = (E) curr.getE().copy();
+    		curr =curr.nextE;
+    	}
+    	return array;
     }
 
     @Override
     public void sway(int position1, int position2) {
-	// TODO Auto-generated method stub
+    	Node<E> curr = this.element;
+    	Node<E> temmp = null;
+    	Node<E> e1 = null;
+    	Node<E> e2 = null;
+    	int smallP,bigP;
+    	if(position1 <= this.size -1 && position1 >= 0 
+    			&& position2 <= this.size -1 && position2 >= 0
+    			){
+    		if(position1 < position2){
+    			smallP = position1;
+    			bigP = position2;
+    		}
+    		else if(position1 > position2){
+    			smallP = position2;
+    			bigP = position1;
+    		}
+    		else{
+    			return;
+    		}
+    		for(int i = 0;i<=bigP;i++){
+    			if(i==(smallP-1)){
+    				e1 = curr;
+    			}
+    			if(i==bigP-1){
+    				e2 = curr;    				
+    			}
+    			curr = curr.nextE;
+    		}
+    		temmp = e1.nextE;
+    		e1.nextE= e2.nextE;
+    		e1.nextE = e2.nextE;
+    		
+    	}
+    	else{
+    		throw new IndexOutOfBoundsException();
+    	}
 	
     }
 
@@ -149,5 +267,8 @@ public class MyLinkedList<E> implements MyList<E> {
 	// TODO Auto-generated method stub
 	
     }
+
+
+	
 
 }
