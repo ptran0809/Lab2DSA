@@ -6,11 +6,12 @@ public class MyCircularLinkedList<E> implements MyList<E> {
 		private E item;
 		private Node next;
 		
+		@SuppressWarnings("unused")
 		public Node(E item, Node next) {
 			this.item = item;
 			this.next = next;
 		}
-		public Node(E e) {
+		public Node(E item) {
 			this.item = item;
 		}
 		public E getItem() {
@@ -185,29 +186,41 @@ public class MyCircularLinkedList<E> implements MyList<E> {
 		return numItems;		
 	}
     
+	@SuppressWarnings("unchecked")
 	@Override
-    public MyList<E> subList(int fromIndex,int toIndex) {
+    public MyList<E> subList(int fromIndex, int toIndex) {
     	if(fromIndex <= size() - 1 && fromIndex >=0
     		&& toIndex <= size() - 1 && toIndex >= 0
     		&& fromIndex < toIndex) {
     		MyCircularLinkedList<E> subList = new MyCircularLinkedList<E>();
-    		
+    		for(int i = fromIndex; i <= toIndex; i++) {
+    			Object h = get(i);
+    			subList.add((E)h);
+    		}
+    		return subList;
     	}
+    	return null;
 	}
     
+	@SuppressWarnings("unchecked")
 	@Override
     public E[] toArray() {
-    	return this.arrayHolder;
+		Object[] array = new Object[size()];
+    	for(int i = 0; i < size(); i++) {
+    		array[i] = get(i);
+    	}
+    	return (E[])array;
     }
     
+	@SuppressWarnings("unchecked")
 	@Override
     public void sway(int position1, int position2) {
-    	if(position1 <= this.size - 1 && position1 >= 0
-    		&& position2 <= this.size - 1 && position2 >= 0
-    		&& position1 < position2) {
-    		E temp = this.arrayHolder[position1];
-    		this.arrayHolder[position1] = this.arrayHolder[position2];
-    		this.arrayHolder[position2] = temp;
+    	if(position1 <= size() - 1 && position1 >= 1 
+    		&& position2 <= size() - 1 && position2 >= 1) {
+    		E temp1 = (E)get(position1);
+    		E temp2 = (E)get(position2);
+    		set(position2, temp1);
+    		set(position1, temp2);
     	}
     	else {
     		throw new IndexOutOfBoundsException();
@@ -215,32 +228,30 @@ public class MyCircularLinkedList<E> implements MyList<E> {
     }
     
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked"})
     public void shift(int position) {
-		int toRotate = Math.abs(position)%this.size;
-		E[] tempArray = (E[])new Object[toRotate];
-		if(position > 0) {
-			for(int i = this.size - toRotate; i < this.size; i ++) {
-				tempArray[i - (this.size - toRotate)] = this.arrayHolder[i];
+		if(position == 0) {
+			return;
+		}
+		if(position >= 1) {
+			for(int i = 0; i < position; i++) {
+				E temp = (E)get(1);
+				for(int k = 0; k < size() - 1; k++) {
+					set((k + 1), (E)get(k));
+					set(k, temp);
+					temp = (E)get(k + 1); 
+				}
+				set(0, temp);
 			}
-			for(int i = this.size - 1; i >= toRotate; i--) {
-				this.arrayHolder[i] = this.arrayHolder[i - toRotate];
-			    }
-			for(int i = 0; i < tempArray.length; i++){
-				this.arrayHolder[toRotate - i] = tempArray[i];
-			    }			
 		}
-		else if(position < 0) {
-			for(int i = 0; i < toRotate; i++){
-				tempArray[i] = this.arrayHolder[i];
-			    }
-			for(int i = toRotate; i < this.size; i++){
-				this.arrayHolder[i - toRotate] = this.arrayHolder[i];
-			    }
-			for(int i = 0; i < tempArray.length; i++){
-				this.arrayHolder[this.size - toRotate - i] = tempArray[i];
-			    }
+		if(position <= -1) {
+			for(int i = position; i < 0; i--) {
+				E temp = (E)get(0);
+				for(int k = 0; k < size() - 1; k++) {
+					set(k, (E)get(k + 1));
+				}
+				set((size() - 1), temp);
+			}
 		}
-    	
     }
 }
